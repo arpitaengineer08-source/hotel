@@ -217,8 +217,103 @@ h1, h2, h3, h4, p, span, label {{ color: {TEXT_LIGHT}; }}
 [data-testid="stDataFrame"] {{ border-radius: 10px; overflow: hidden; }}
 .stSpinner > div > div {{ border-top-color: {ACCENT_CYAN} !important; }}
 hr {{ border-color: {GRID_COLOR}; }}
+
+/* ============ Intro storytelling overlay ============ */
+.intro-overlay {{
+    position: fixed; inset: 0; z-index: 9999;
+    background: radial-gradient(circle at 50% 38%, #1a1f3d 0%, #05060d 82%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    animation: introFadeOut 5.5s ease forwards;
+}}
+@keyframes introFadeOut {{
+    0%, 82% {{ opacity: 1; visibility: visible; }}
+    100%    {{ opacity: 0; visibility: hidden; }}
+}}
+.intro-scene {{ position: relative; width: 320px; height: 150px; margin-bottom: 22px; }}
+.intro-door {{
+    position: absolute; right: 6px; top: 4px; font-size: 60px;
+    filter: drop-shadow(0 0 18px rgba(79,209,255,0.4));
+}}
+.walker {{
+    position: absolute; bottom: 4px; font-size: 32px; opacity: 0;
+    animation: walkIn 1.7s ease forwards;
+}}
+.walker.w1 {{ left: -36px; animation-delay: 0.3s; }}
+.walker.w2 {{ left: -36px; animation-delay: 1.0s; font-size: 28px; }}
+.walker.w3 {{ left: -36px; animation-delay: 1.7s; font-size: 36px; }}
+@keyframes walkIn {{
+    0%   {{ opacity: 0; transform: translateX(0); }}
+    12%  {{ opacity: 1; }}
+    100% {{ opacity: 1; transform: translateX(215px); }}
+}}
+.bubble {{
+    position: absolute; bottom: 62px; background: rgba(255,255,255,0.07);
+    border: 1px solid {ACCENT_CYAN}; border-radius: 12px; padding: 5px 12px;
+    font-size: 0.76rem; color: {TEXT_LIGHT}; opacity: 0; white-space: nowrap;
+    animation: bubbleShow 0.9s ease forwards;
+}}
+.bubble.b1 {{ left: 120px; animation-delay: 1.8s; }}
+.bubble.b2 {{ left: 140px; animation-delay: 2.5s; }}
+.bubble.b3 {{ left: 100px; animation-delay: 3.2s; }}
+@keyframes bubbleShow {{
+    from {{ opacity: 0; transform: translateY(6px); }}
+    to   {{ opacity: 1; transform: translateY(0); }}
+}}
+.intro-title {{
+    font-size: 2.1rem; font-weight: 800; opacity: 0; text-align: center;
+    background: linear-gradient(90deg, {ACCENT_CYAN}, {ACCENT_PURPLE});
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    animation: introTitleShow 1s ease forwards; animation-delay: 3.9s;
+}}
+.intro-sub {{
+    color: {TEXT_DIM}; font-size: 0.9rem; opacity: 0; margin-top: 8px; text-align: center;
+    animation: introTitleShow 1s ease forwards; animation-delay: 4.3s;
+}}
+@keyframes introTitleShow {{
+    from {{ opacity: 0; transform: translateY(10px); }}
+    to   {{ opacity: 1; transform: translateY(0); }}
+}}
+
+/* ============ Live moving cursor (decorative) ============ */
+.live-cursor-wrap {{ position: relative; }}
+.live-cursor {{
+    position: absolute; width: 14px; height: 14px; border-radius: 50%;
+    background: radial-gradient(circle, {ACCENT_CYAN} 0%, rgba(79,209,255,0) 70%);
+    box-shadow: 0 0 12px 4px rgba(79,209,255,0.45);
+    animation: cursorMove 9s ease-in-out infinite;
+    top: -8px; pointer-events: none; z-index: 5;
+}}
+@keyframes cursorMove {{
+    0%, 18%  {{ left: 8%;  top: -8px; }}
+    25%, 43% {{ left: 33%; top: -8px; }}
+    50%, 68% {{ left: 58%; top: -8px; }}
+    75%, 93% {{ left: 82%; top: -8px; }}
+    100%     {{ left: 8%;  top: -8px; }}
+}}
 </style>
 """, unsafe_allow_html=True)
+
+# ----------------------------------------------------------------------
+# One-time storytelling intro: three guests walk in and welcome you,
+# then the overlay fades away to reveal the dashboard.
+# ----------------------------------------------------------------------
+if "intro_played" not in st.session_state:
+    st.session_state.intro_played = True
+    st.markdown("""
+    <div class="intro-overlay">
+        <div class="intro-scene">
+            <div class="intro-door">🚪</div>
+            <div class="walker w1">🧍</div>
+            <div class="bubble b1">Welcome!</div>
+            <div class="walker w2">🧳</div>
+            <div class="bubble b2">Welcome to the hotel!</div>
+            <div class="walker w3">🧑‍🤝‍🧑</div>
+            <div class="bubble b3">Enjoy your stay!</div>
+        </div>
+        <div class="intro-title">Welcome to HotelScope</div>
+        <div class="intro-sub">Preparing your booking intelligence dashboard…</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # ----------------------------------------------------------------------
@@ -318,7 +413,7 @@ def render_kpis(data, key_prefix=""):
         {"label": "Avg. Lead Time", "value": data["lead_time"].mean(), "decimals": 0, "prefix": "", "suffix": " days"},
         {"label": "Avg. Daily Rate", "value": data["adr"].mean(), "decimals": 2, "prefix": "$", "suffix": ""},
     ]
-    html = '<div class="kpi-row">'
+    html = '<div class="kpi-row live-cursor-wrap"><div class="live-cursor"></div>'
     for i, k in enumerate(kpis):
         html += f"""
         <div class="kpi-card">
