@@ -223,38 +223,38 @@ hr {{ border-color: {GRID_COLOR}; }}
     position: fixed; inset: 0; z-index: 9999;
     background: radial-gradient(circle at 50% 38%, #1a1f3d 0%, #05060d 82%);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    animation: introFadeOut 5.5s ease forwards;
+    animation: introFadeOut 6.5s ease forwards;
 }}
 @keyframes introFadeOut {{
-    0%, 82% {{ opacity: 1; visibility: visible; }}
+    0%, 85% {{ opacity: 1; visibility: visible; }}
     100%    {{ opacity: 0; visibility: hidden; }}
 }}
-.intro-scene {{ position: relative; width: 320px; height: 150px; margin-bottom: 22px; }}
+.intro-scene {{ position: relative; width: 460px; max-width: 88vw; height: 210px; margin-bottom: 26px; }}
 .intro-door {{
-    position: absolute; right: 6px; top: 4px; font-size: 60px;
+    position: absolute; right: 16px; top: 14px; font-size: 56px;
     filter: drop-shadow(0 0 18px rgba(79,209,255,0.4));
 }}
 .walker {{
-    position: absolute; bottom: 4px; font-size: 32px; opacity: 0;
-    animation: walkIn 1.7s ease forwards;
+    position: absolute; font-size: 32px; opacity: 0;
+    animation: walkIn 1.9s ease forwards;
 }}
-.walker.w1 {{ left: -36px; animation-delay: 0.3s; }}
-.walker.w2 {{ left: -36px; animation-delay: 1.0s; font-size: 28px; }}
-.walker.w3 {{ left: -36px; animation-delay: 1.7s; font-size: 36px; }}
+.walker.w1 {{ left: -40px; bottom: 130px; animation-delay: 0.3s; }}
+.walker.w2 {{ left: -40px; bottom: 68px;  animation-delay: 1.1s; font-size: 28px; }}
+.walker.w3 {{ left: -40px; bottom: 6px;   animation-delay: 1.9s; font-size: 36px; }}
 @keyframes walkIn {{
     0%   {{ opacity: 0; transform: translateX(0); }}
     12%  {{ opacity: 1; }}
-    100% {{ opacity: 1; transform: translateX(215px); }}
+    100% {{ opacity: 1; transform: translateX(330px); }}
 }}
 .bubble {{
-    position: absolute; bottom: 62px; background: rgba(255,255,255,0.07);
-    border: 1px solid {ACCENT_CYAN}; border-radius: 12px; padding: 5px 12px;
-    font-size: 0.76rem; color: {TEXT_LIGHT}; opacity: 0; white-space: nowrap;
+    position: absolute; background: rgba(255,255,255,0.07);
+    border: 1px solid {ACCENT_CYAN}; border-radius: 12px; padding: 6px 14px;
+    font-size: 0.78rem; color: {TEXT_LIGHT}; opacity: 0; white-space: nowrap;
     animation: bubbleShow 0.9s ease forwards;
 }}
-.bubble.b1 {{ left: 120px; animation-delay: 1.8s; }}
-.bubble.b2 {{ left: 140px; animation-delay: 2.5s; }}
-.bubble.b3 {{ left: 100px; animation-delay: 3.2s; }}
+.bubble.b1 {{ left: 190px; bottom: 172px; animation-delay: 2.0s; }}
+.bubble.b2 {{ left: 210px; bottom: 108px; animation-delay: 2.8s; }}
+.bubble.b3 {{ left: 170px; bottom: 46px;  animation-delay: 3.6s; }}
 @keyframes bubbleShow {{
     from {{ opacity: 0; transform: translateY(6px); }}
     to   {{ opacity: 1; transform: translateY(0); }}
@@ -263,11 +263,11 @@ hr {{ border-color: {GRID_COLOR}; }}
     font-size: 2.1rem; font-weight: 800; opacity: 0; text-align: center;
     background: linear-gradient(90deg, {ACCENT_CYAN}, {ACCENT_PURPLE});
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    animation: introTitleShow 1s ease forwards; animation-delay: 3.9s;
+    animation: introTitleShow 1s ease forwards; animation-delay: 4.4s;
 }}
 .intro-sub {{
     color: {TEXT_DIM}; font-size: 0.9rem; opacity: 0; margin-top: 8px; text-align: center;
-    animation: introTitleShow 1s ease forwards; animation-delay: 4.3s;
+    animation: introTitleShow 1s ease forwards; animation-delay: 4.8s;
 }}
 @keyframes introTitleShow {{
     from {{ opacity: 0; transform: translateY(10px); }}
@@ -276,6 +276,7 @@ hr {{ border-color: {GRID_COLOR}; }}
 
 /* ============ Live moving cursor (decorative) ============ */
 .live-cursor-wrap {{ position: relative; }}
+.cursor-track {{ position: relative; height: 4px; margin: 4px 0 22px 0; }}
 .live-cursor {{
     position: absolute; width: 14px; height: 14px; border-radius: 50%;
     background: radial-gradient(circle, {ACCENT_CYAN} 0%, rgba(79,209,255,0) 70%);
@@ -478,6 +479,15 @@ def typewriter(text, elem_id, speed=28):
     """, height=0)
 
 
+def cursor_track():
+    """A thin decorative strip with a glowing dot that drifts left-to-right,
+    giving each page a sense of live movement without overlapping content."""
+    st.markdown(
+        '<div class="cursor-track live-cursor-wrap"><div class="live-cursor"></div></div>',
+        unsafe_allow_html=True,
+    )
+
+
 # ----------------------------------------------------------------------
 # PAGE: Home
 # ----------------------------------------------------------------------
@@ -535,6 +545,7 @@ if st.session_state.page == "Home":
 elif st.session_state.page == "Executive Dashboard":
     st.markdown('<h2>📊 Executive Dashboard</h2>', unsafe_allow_html=True)
     st.caption("A snapshot of overall booking volume, cancellation rate, and hotel-type mix for the current selection.")
+    cursor_track()
     render_kpis(filtered, key_prefix="exec")
 
     c1, c2 = st.columns([1, 2])
@@ -567,6 +578,7 @@ elif st.session_state.page == "Executive Dashboard":
 elif st.session_state.page == "Booking Trends":
     st.markdown('<h2>📅 Booking Trends</h2>', unsafe_allow_html=True)
     st.caption("Which hotel type is booked most often, and how does demand shift across the year?")
+    cursor_track()
 
     monthly = filtered.groupby(["arrival_date_month", "hotel"], observed=True).size().reset_index(name="bookings")
     fig, ax = plt.subplots(figsize=(12, 5))
@@ -589,6 +601,7 @@ elif st.session_state.page == "Booking Trends":
 elif st.session_state.page == "Cancellation Analysis":
     st.markdown('<h2>❌ Cancellation Analysis</h2>', unsafe_allow_html=True)
     st.caption("Does length of stay or lead time influence how often a booking gets cancelled?")
+    cursor_track()
 
     st.markdown("#### Stay duration vs. cancellation")
     stay_cancel = (
@@ -634,6 +647,7 @@ elif st.session_state.page == "Cancellation Analysis":
 elif st.session_state.page == "Revenue & Customers":
     st.markdown('<h2>💰 Revenue & Customers</h2>', unsafe_allow_html=True)
     st.caption("Average daily rate trends and the customer segments driving bookings.")
+    cursor_track()
 
     c1, c2 = st.columns(2)
     with c1:
